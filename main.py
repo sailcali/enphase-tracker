@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/enphase-tracker/venv/bin/python3
 
 import os
 from dotenv import load_dotenv
@@ -50,7 +50,7 @@ def append_production_data(data):
 
     # existing_data = pd.read_sql_table('production', db, index_col=['time'])
     # new_data = data.drop(existing_data.index, errors='ignore', axis=0)
-    data.to_sql('production', db, if_exists='append')
+    data.to_sql('enphase_production', db, if_exists='append')
 
 
 if __name__ == '__main__':
@@ -58,7 +58,7 @@ if __name__ == '__main__':
     # Establish connection only to determine when the last entry was
     db = create_engine(DB_STRING)
     with db.connect() as con:
-        sql = 'SELECT date(time) FROM production ORDER BY time DESC LIMIT 1;'
+        sql = 'SELECT date(time) FROM enphase_production ORDER BY time DESC LIMIT 1;'
         result = con.execute(sql)
         last_date = result.fetchone()[0]
     last_date = last_date + timedelta(days=1)
