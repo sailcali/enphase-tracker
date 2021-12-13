@@ -19,7 +19,7 @@ DB_STRING_RAS = os.environ.get('DB_STRING_RAS')
 local_db = create_engine(DB_STRING)
 ras_db = create_engine(DB_STRING_RAS)
 
-local_data = pd.read_sql_table('production', local_db, index_col=['time'])
-local_data.to_sql('production', ras_db, if_exists='append')
+start_data = pd.read_sql_table('production', local_db, index_col=['time'])
+start_data.to_sql('production', ras_db, if_exists='append')
 
 print('Sucessfully Migrated!')
