@@ -5,10 +5,8 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 import pandas as pd
 import requests
-from sqlalchemy import create_engine
-from sqlalchemy import Column, DateTime, SmallInteger
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+
+from accessInstance import AccessInstance
 
 # For debugging - view all rows in terminal
 pd.set_option('display.max_rows', None)
@@ -17,12 +15,11 @@ pd.set_option('display.max_rows', None)
 load_dotenv()
 
 # Setting all globals
-TOKEN = os.environ.get("ENPHASE_TOKEN")
-USER_ID = os.environ.get("ENPHASE_USER_ID")
+API_KEY = os.environ.get("ENPHASE_KEY")
 SYSTEM_ID = os.environ.get("SYSTEM_ID")
-SYSTEM_URL = f"https://api.enphaseenergy.com/api/v2/systems?key={TOKEN}&user_id={USER_ID}"
-PRODUCTION_URL = f'https://api.enphaseenergy.com/api/v2/systems/{SYSTEM_ID}/stats'
-DB_STRING = os.environ.get('DB_STRING')
+
+SYSTEM_URL = f"api.enphaseenergy.com/api/v4/systems/{SYSTEM_ID}/summary?key={API_KEY}"
+PRODUCTION_URL = f'https://api.enphaseenergy.com/api/v4/systems/{SYSTEM_ID}/rgm_stats?key={API_KEY}'
 
 
 def get_production_data_from_select_day(start_at):
@@ -30,34 +27,27 @@ def get_production_data_from_select_day(start_at):
     data = pd.DataFrame(columns=['time', 'production'])
 
     # Request data from API
-    payload = {'key': TOKEN, 'user_id': USER_ID,
-               'start_at': start_at}
-    response = requests.get(PRODUCTION_URL, payload)
+    header = {'Authorization': "Bearer " + ACCESS_DATA.access_token}
+    response = requests.get(PRODUCTION_URL, headers=header)
     body = response.json()
-
+    
     # Load data into the DataFrame
     for interval in body['intervals']:
-        data = data.append({'time': datetime.fromtimestamp(interval['end_at']),
-                                'production': interval['enwh']}, ignore_index=True)
+        if interval['wh_del'] != 0:
+            data = data.append({'time': datetime.fromtimestamp(interval['end_at']),
+                                    'production': interval['wh_del']}, ignore_index=True)
     data.set_index(['time'], inplace=True)
 
     return data
 
 
-def append_production_data(data):
-    """Append new data to production table"""
-    db = create_engine(DB_STRING)
-
-    # existing_data = pd.read_sql_table('production', db, index_col=['time'])
-    # new_data = data.drop(existing_data.index, errors='ignore', axis=0)
-    data.to_sql('enphase_production', db, if_exists='append')
-
-
 if __name__ == '__main__':
 
-    # Establish connection only to determine when the last entry was
-    db = create_engine(DB_STRING)
-    with db.connect() as con:
+    # Create Access instance which manages the OAUTH2.0 keys and handles the db connection
+    ACCESS_DATA = AccessInstance()
+
+    # Record the last day of data in the database
+    with ACCESS_DATA.db.connect() as con:
         sql = 'SELECT date(time) FROM enphase_production ORDER BY time DESC LIMIT 1;'
         result = con.execute(sql)
         last_date = result.fetchone()[0]
@@ -69,7 +59,7 @@ if __name__ == '__main__':
     # Get production data for current date, append to table, and then move to next day
     while True:
         data = get_production_data_from_select_day(start_date)
-        append_production_data(data)
+        data.to_sql('enphase_production', ACCESS_DATA.db, if_exists='append')
         start_date = start_date + 86400
         if start_date > datetime.now().timestamp():
             break
