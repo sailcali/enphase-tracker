@@ -19,7 +19,7 @@ API_KEY = os.environ.get("ENPHASE_KEY")
 SYSTEM_ID = os.environ.get("SYSTEM_ID")
 
 SYSTEM_URL = f"api.enphaseenergy.com/api/v4/systems/{SYSTEM_ID}/summary?key={API_KEY}"
-PRODUCTION_URL = f'https://api.enphaseenergy.com/api/v4/systems/{SYSTEM_ID}/rgm_stats?key={API_KEY}'
+PRODUCTION_URL = f'https://api.enphaseenergy.com/api/v4/systems/{SYSTEM_ID}/telemetry/production_micro'
 
 
 def get_production_data_from_select_day(start_at):
@@ -28,14 +28,15 @@ def get_production_data_from_select_day(start_at):
 
     # Request data from API
     header = {'Authorization': "Bearer " + ACCESS_DATA.access_token}
-    response = requests.get(PRODUCTION_URL, headers=header)
+    params = {"key": API_KEY, "start_at": start_at}
+    response = requests.get(PRODUCTION_URL, params=params, headers=header)
     body = response.json()
     
     # Load data into the DataFrame
     for interval in body['intervals']:
-        if interval['wh_del'] != 0:
+        if interval['enwh'] != 0:
             data = data.append({'time': datetime.fromtimestamp(interval['end_at']),
-                                    'production': interval['wh_del']}, ignore_index=True)
+                                    'production': interval['enwh']}, ignore_index=True)
     data.set_index(['time'], inplace=True)
 
     return data
