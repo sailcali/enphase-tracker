@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import os
 import base64
 import requests
-from discord_bot import send_to_discord
+from discordwebhook import Discord
 
 SECONDS_PER_DAY = 86400 - 60
 SECONDS_PER_WEEK = 604800 - 60
@@ -18,8 +18,8 @@ load_dotenv()
 API_KEY = os.environ.get("ENPHASE_KEY")
 SYSTEM_ID = os.environ.get("SYSTEM_ID")
 DB_STRING = os.environ.get('DB_STRING')
-DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
-CHANNEL_ID = int(os.getenv('ENPHASE_CHANNEL_ID'))
+
+CHANNEL_URL = os.getenv('ENPHASE_CHANNEL_URL')
 
 CLIENT_ID = os.environ.get("ENPHASE_CLIENT_ID")
 CLIENT_SECRET = os.environ.get("ENPHASE_CLIENT_SECRET")
@@ -71,7 +71,8 @@ class AccessInstance:
         refresh_age = datetime.now(pytz.UTC) - self.refresh_date
         if access_age.total_seconds() > SECONDS_PER_DAY:
             if refresh_age.total_seconds() > SECONDS_PER_WEEK:
-                send_to_discord("Refresh token expired!", DISCORD_TOKEN, CHANNEL_ID)
+                discord = Discord(url=CHANNEL_URL)
+                discord.post(content=f"Enphase refresh token expired!")
             else:
                 print("refresh")
                 self.get_refresh_token()

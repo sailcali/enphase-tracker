@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 import pandas as pd
 import requests
+from discordwebhook import Discord
 
-from discord_bot import send_to_discord
 from accessInstance import AccessInstance
 
 # For debugging - view all rows in terminal
@@ -18,8 +18,7 @@ load_dotenv()
 # Setting all globals
 API_KEY = os.environ.get("ENPHASE_KEY")
 SYSTEM_ID = os.environ.get("SYSTEM_ID")
-TOKEN = os.getenv('DISCORD_TOKEN')
-CHANNEL_ID = int(os.getenv('ENPHASE_CHANNEL_ID'))
+CHANNEL_URL = os.getenv('ENPHASE_CHANNEL_URL')
 
 SYSTEM_URL = f"api.enphaseenergy.com/api/v4/systems/{SYSTEM_ID}/summary?key={API_KEY}"
 PRODUCTION_URL = f'https://api.enphaseenergy.com/api/v4/systems/{SYSTEM_ID}/telemetry/production_micro'
@@ -42,7 +41,8 @@ def get_production_data_from_select_day(start_at):
                                         'production': interval['enwh']}, ignore_index=True)
         data.set_index(['time'], inplace=True)
     except KeyError:
-        send_to_discord(body, TOKEN, CHANNEL_ID)
+        discord = Discord(url=CHANNEL_URL)
+        discord.post(content=f"No enphase data to record!\nError: {body}%")
 
     return data
 
@@ -70,4 +70,5 @@ if __name__ == '__main__':
             if start_date > datetime.now().timestamp():
                 break
     except Exception as error:
-        send_to_discord(error, TOKEN, CHANNEL_ID)
+        discord = Discord(url=CHANNEL_URL)
+        discord.post(content=f"Enphase data was either partially recorded or not recorded at all!\nError: {error}%")
