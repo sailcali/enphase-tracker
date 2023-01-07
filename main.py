@@ -43,7 +43,7 @@ def get_production_data_from_select_day(start_at):
     except KeyError:
         discord = Discord(url=CHANNEL_URL)
         discord.post(content=f"No enphase data to record!\nError: {body}%")
-
+        quit()
     return data
 
 
