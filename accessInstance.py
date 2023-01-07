@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import os
 import base64
 import requests
+from discord_bot import send_to_discord
 
 SECONDS_PER_DAY = 86400 - 60
 SECONDS_PER_WEEK = 604800 - 60
@@ -17,6 +18,8 @@ load_dotenv()
 API_KEY = os.environ.get("ENPHASE_KEY")
 SYSTEM_ID = os.environ.get("SYSTEM_ID")
 DB_STRING = os.environ.get('DB_STRING')
+DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
+CHANNEL_ID = int(os.getenv('ENPHASE_CHANNEL_ID'))
 
 CLIENT_ID = os.environ.get("ENPHASE_CLIENT_ID")
 CLIENT_SECRET = os.environ.get("ENPHASE_CLIENT_SECRET")
@@ -68,26 +71,10 @@ class AccessInstance:
         refresh_age = datetime.now(pytz.UTC) - self.refresh_date
         if access_age.total_seconds() > SECONDS_PER_DAY:
             if refresh_age.total_seconds() > SECONDS_PER_WEEK:
-                code = input("Enter new session code: ")
-                self.get_access_token(code)
+                send_to_discord("Refresh token expired!", DISCORD_TOKEN, CHANNEL_ID)
             else:
                 print("refresh")
                 self.get_refresh_token()
-
-    def get_access_token(self, user_code):
-        """Uses new user code as parameter to fetch new access and refresh tokens from API. 
-        Will automatically retrieve the data and verify"""
-
-        header = {'Authorization': "Basic " + AUTH_KEY}
-        response = requests.post(ACCESS_URL + user_code, headers=header)
-        body = response.json()
-        access_token = body['access_token']
-        refresh_token = body['refresh_token']
-        data = [{'at': access_token, 'rt': refresh_token, 'acdate': datetime.now(pytz.UTC), 'rfdate': datetime.now(pytz.UTC), 'user': user_code}]
-        df = pd.DataFrame(data)
-        df.set_index(['user'], inplace=True)
-        df.to_sql('sd_access', self.db, if_exists='replace')
-        self.get_access_data()
 
     def get_refresh_token(self):
         """Fetch new access token from API using refresh token. Returns a new refresh token and posts to database
