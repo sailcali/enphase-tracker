@@ -61,7 +61,6 @@ if __name__ == '__main__':
         my_time = datetime.min.time()
         last_datetime = datetime.combine(last_date, my_time)
         start_date = int(last_datetime.timestamp())  # start date will be the day after most recent in database
-        
         # Get production data for current date, append to table, and then move to next day
         while True:
             data = get_production_data_from_select_day(start_date)
@@ -71,4 +70,4 @@ if __name__ == '__main__':
                 break
     except Exception as error:
         discord = Discord(url=CHANNEL_URL)
-        discord.post(content=f"Enphase data was either partially recorded or not recorded at all!\nError: {error}%")
+        discord.post(content=f"Enphase data was either partially recorded or not recorded at all!\nError: {error}")
