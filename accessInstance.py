@@ -87,9 +87,9 @@ class AccessInstance:
         body = response.json()
         access_token = body['access_token']
         refresh_token = body['refresh_token']
-        data = [{'at': access_token, 'rt': refresh_token, 'acdate': datetime.now(pytz.UTC), 'rfdate': datetime.now(pytz.UTC), 'user': self.user_code}]
-        df = pd.DataFrame(data)
-        df.set_index(['user'], inplace=True)
+        data = {'at': access_token, 'rt': refresh_token, 'acdate': datetime.now(pytz.UTC), 'rfdate': datetime.now(pytz.UTC), 'user': self.user_code}
+        # df = pd.DataFrame(data)
+        # df.set_index(['user'], inplace=True)
         # df.to_sql('sd_access', self.db, if_exists='replace')
         conn = psycopg2.connect("host='{}' port={} dbname='{}' user={} password={}".format('127.0.0.1', '5432', 'kiowa-monitor', 'postgres', DB_PASS))
         sql = f"""UPDATE sd_access SET at = {data['at']}, rt = {data['rt']}, acdate = {data['acdate']}, rfdate = {data['rfdate']} WHERE user = {self.user_code};"""
