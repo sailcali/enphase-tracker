@@ -57,6 +57,7 @@ class AccessInstance:
             sql = 'SELECT * FROM sd_access;'
             result = con.execute(sql)
             data = result.fetchone()
+        print(data)
         self.user_code = data[0]
         self.access_token = data[1]
         self.refresh_token = data[2]
