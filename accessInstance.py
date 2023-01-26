@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine
+import psycopg2
 import pandas as pd
 from datetime import datetime
 import pytz
@@ -18,7 +19,7 @@ load_dotenv()
 API_KEY = os.environ.get("ENPHASE_KEY")
 SYSTEM_ID = os.environ.get("SYSTEM_ID")
 DB_STRING = os.environ.get('DB_STRING')
-
+PWD = os.environ.get("PWD")
 CHANNEL_URL = os.getenv('ENPHASE_CHANNEL_URL')
 
 CLIENT_ID = os.environ.get("ENPHASE_CLIENT_ID")
@@ -89,7 +90,12 @@ class AccessInstance:
         data = [{'at': access_token, 'rt': refresh_token, 'acdate': datetime.now(pytz.UTC), 'rfdate': datetime.now(pytz.UTC), 'user': self.user_code}]
         df = pd.DataFrame(data)
         df.set_index(['user'], inplace=True)
-        df.to_sql('sd_access', self.db, if_exists='replace')
+        # df.to_sql('sd_access', self.db, if_exists='replace')
+        conn = psycopg2.connect("host='{}' port={} dbname='{}' user={} password={}".format('127.0.0.1', '5432', 'kiowa-monitor', 'postgres', PWD))
+        sql = f"""UPDATE sd_access SET at = {data['at']}, rt = {data['rt']}, acdate = {data['acdate']}, rfdate = {data['rfdate']} WHERE user = {self.user_code};"""
+        conn.execute(sql)
+        conn.commit()
+        conn.close()
         self.get_access_data()
 
     def __str__(self):
