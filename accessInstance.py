@@ -92,9 +92,9 @@ class AccessInstance:
         # df.set_index(['user'], inplace=True)
         # df.to_sql('sd_access', self.db, if_exists='replace')
         conn = psycopg2.connect("host='{}' port={} dbname='{}' user={} password={}".format('127.0.0.1', '5432', 'kiowa-monitor', 'postgres', DB_PASS))
-        sql = f"""UPDATE sd_access SET at = '{data['at']}', rt = '{data['rt']}', acdate = '{data['acdate']}', rfdate = '{data['rfdate']}' WHERE user = '{self.user_code}';"""
-        csr = conn.cursor()
-        csr.execute(sql)
+        sql = f"""UPDATE sd_access SET at = %s, rt = %s, acdate = %s, rfdate = %s WHERE user = %s;"""
+        csr = conn.cursor() 
+        csr.execute(sql, (data['at'],data['rt'],data['acdate'],data['rfdate'],self.user_code))
         conn.commit()
         csr.close()
         conn.close()
