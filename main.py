@@ -2,7 +2,7 @@
 
 import os
 from dotenv import load_dotenv
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import time
 import requests
 from discordwebhook import Discord
@@ -56,7 +56,7 @@ if __name__ == '__main__':
         current_date = last_date + timedelta(days=1) # start date will be the day after most recent in database
         current_date_timestamp = int(time.mktime(current_date.timetuple()))  # Convert to timestamp to work with enphase
         # Get production data for current date, append to table, and then move to next day
-        while current_date <= datetime.today():
+        while current_date <= date.today():
             data = get_production_data_from_select_day(current_date_timestamp)
             
             response = requests.post("http://" + SERVER_IP + f"/solar/production/{current_date}", json={"days_production": data})
