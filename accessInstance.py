@@ -63,8 +63,8 @@ class AccessInstance:
         """If access token is older than a day, get a new one
         If refresh token is older than a week, get a new code from user"""
         try:
-            access_age = datetime.now() - self.access_date
-            refresh_age = datetime.now() - self.refresh_date
+            access_age = datetime.now(pytz.UTC) - self.access_date
+            refresh_age = datetime.now(pytz.UTC) - self.refresh_date
         except TypeError as error:
             print(error)
             quit()
