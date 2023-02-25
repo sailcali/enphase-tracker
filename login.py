@@ -29,7 +29,7 @@ response = requests.post(ACCESS_URL + user_code, headers=header)
 body = response.json()
 access_token = body['access_token']
 refresh_token = body['refresh_token']
-data = [{'at': access_token, 'rt': refresh_token, 'date': datetime.strftime(datetime.now(pytz.UTC), '%a, %d %b %Y %H:%M:%S %Z'), 'user': user_code}]
+data = {'at': access_token, 'rt': refresh_token, 'date': datetime.strftime(datetime.now(pytz.UTC), '%a, %d %b %Y %H:%M:%S %Z'), 'user': user_code}
 response = requests.post("http://" + SERVER_IP + "/solar/access",
                             headers={'password': SERVER_PWD},
                             json=data)
