@@ -101,7 +101,7 @@ def get_production_data_from_select_day(current_date_timestamp):
 if __name__ == '__main__':
     try:
         get_daily_pool_temp_graph()
-    except Exception:
+    except Exception as error:
         discord = Discord(url=POOL_CHANNEL_URL)
         discord.post(content=f"Pool data was either inaccessible or could not be compiled!\nError: {error}")
     try:
