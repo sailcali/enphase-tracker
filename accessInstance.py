@@ -53,6 +53,7 @@ class AccessInstance:
                             json={"user": self.user_code})
         data = response.json()['keys']
         date = datetime.strptime(data['date'], '%a, %d %b %Y %H:%M:%S %Z')
+        date = date.replace(tzinfo=pytz.UTC)
         self.access_token = data["at"]
         self.refresh_token = data["rt"]
         self.access_date = date
