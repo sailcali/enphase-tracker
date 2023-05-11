@@ -25,6 +25,13 @@ DB_USER = os.environ.get("DB_USER")
 DB_PASS = os.environ.get("DB_PASS")
 DB_HOST = os.environ.get("DB_HOST")
 DB_NAME = os.environ.get("DB_NAME")
+POOL_START_TIME = 17
+POOL_END_TIME = 00
+END_NEXT_DAY = True
+if END_NEXT_DAY:
+    NEXT_DAY = 1
+else:
+    NEXT_DAY = 0
 
 SYSTEM_URL = f"api.enphaseenergy.com/api/v4/systems/{SYSTEM_ID}/summary?key={API_KEY}"
 PRODUCTION_URL = f'https://api.enphaseenergy.com/api/v4/systems/{SYSTEM_ID}/telemetry/production_micro'
@@ -34,14 +41,14 @@ def get_daily_pool_temp_graph():
     today = datetime.today().date()
     # start_date = today - timedelta(days=days_ago)
     start_date = today
-    end_date = start_date + timedelta(days=1)
+    end_date = start_date + timedelta(days=NEXT_DAY)
     query = f"""SELECT pooldata.datetime,
         pooldata.roof_temp,
         pooldata.water_temp,
         pooldata.valve,
         pooldata.temp_range
     FROM pooldata
-    WHERE pooldata.datetime > '{start_date} 17:00:00+00'::timestamp with time zone AND pooldata.datetime < '{end_date} 02:00:00+00'::timestamp with time zone
+    WHERE pooldata.datetime > '{start_date} {POOL_START_TIME}:00:00+00'::timestamp with time zone AND pooldata.datetime < '{end_date} {POOL_END_TIME}:00:00+00'::timestamp with time zone
     ORDER BY pooldata.datetime DESC;"""
 
     # query = "SELECT * from pool23apr"
