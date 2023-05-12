@@ -79,6 +79,7 @@ def get_daily_pool_temp_graph():
     plt.xlabel('Time (UTC)')
     plt.ylabel('Temp (F)')
     plt.legend()
+    plt.tick_params(left=True,right=True)
     filename = "pool_today.jpg"
     plt.savefig(filename)
     discord = Discord(url=POOL_CHANNEL_URL)
