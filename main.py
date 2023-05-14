@@ -27,7 +27,7 @@ DB_HOST = os.environ.get("DB_HOST")
 DB_NAME = os.environ.get("DB_NAME")
 POOL_START_TIME = os.environ.get("POOL_START_TIME")
 POOL_END_TIME = os.environ.get("POOL_END_TIME")
-END_NEXT_DAY = os.environ.get("POOL_END_NEXT_DAY")
+END_NEXT_DAY = (os.environ.get("POOL_END_NEXT_DAY")=="True")
 if END_NEXT_DAY:
     NEXT_DAY = 1
 else:
