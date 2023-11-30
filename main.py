@@ -9,6 +9,7 @@ from discordwebhook import Discord
 import psycopg2
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
+import pool_trigger
 
 from accessInstance import AccessInstance
 
@@ -107,11 +108,12 @@ def get_production_data_from_select_day(current_date_timestamp):
 
 
 if __name__ == '__main__':
-    try:
-        get_daily_pool_temp_graph()
-    except Exception as error:
-        discord = Discord(url=POOL_CHANNEL_URL)
-        discord.post(content=f"Pool data was either inaccessible or could not be compiled!\nError: {error}")
+    if pool_trigger.get_pool_graph == 1:
+        try:
+            get_daily_pool_temp_graph()
+        except Exception as error:
+            discord = Discord(url=POOL_CHANNEL_URL)
+            discord.post(content=f"Pool data was either inaccessible or could not be compiled!\nError: {error}")
     try:
         # Create Access instance which manages the OAUTH2.0 keys and handles the db connection
         ACCESS_DATA = AccessInstance()
