@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+pool_today.jpg
 
 # C extensions
 *.so
